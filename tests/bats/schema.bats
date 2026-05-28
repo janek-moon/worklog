@@ -57,3 +57,27 @@ JSON
     run npx --yes ajv-cli validate --spec=draft7 --allow-union-types -s schemas/config.schema.json -d "${BATS_TMPDIR}/cfg.json"
     [ "$status" -eq 0 ]
 }
+
+@test "config with invalid claudeCode.depth fails" {
+    cat > "${BATS_TMPDIR}/bad_depth.json" <<'JSON'
+{ "sources": { "claudeCode": { "depth": "bogus" } } }
+JSON
+    run npx --yes ajv-cli validate --spec=draft7 --allow-union-types -s schemas/config.schema.json -d "${BATS_TMPDIR}/bad_depth.json"
+    [ "$status" -ne 0 ]
+}
+
+@test "config with invalid learnings.apply.targets[].ifAbsent fails" {
+    cat > "${BATS_TMPDIR}/bad_ifabsent.json" <<'JSON'
+{ "learnings": { "apply": { "targets": [ { "path": "./X.md", "ifAbsent": "nope" } ] } } }
+JSON
+    run npx --yes ajv-cli validate --spec=draft7 --allow-union-types -s schemas/config.schema.json -d "${BATS_TMPDIR}/bad_ifabsent.json"
+    [ "$status" -ne 0 ]
+}
+
+@test "config.example.json has all SPEC top-level keys" {
+    for key in output sources learnings framework language tz pii; do
+        run jq -e "has(\"$key\")" config.example.json
+        [ "$status" -eq 0 ]
+        [ "$output" = "true" ]
+    done
+}

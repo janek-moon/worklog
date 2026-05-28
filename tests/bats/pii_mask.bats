@@ -38,7 +38,7 @@
     [[ "$output" == *"[REDACTED]"* ]]
 }
 
-@test "custom regex containing | does not break sed" {
+@test "custom regex containing | is interpreted literally by awk" {
     run bash -c "WORKLOG_PII_CUSTOM='trace-[a-z]+|debug-[a-z]+' '${BATS_TEST_DIRNAME}/../../scripts/pii_mask.sh' <<< 'trace-foo and debug-bar'"
     [ "$status" -eq 0 ]
     [[ "$output" != *"trace-foo"* ]]
@@ -61,4 +61,15 @@
 @test "exact masked count reported" {
     run bash -c "'${BATS_TEST_DIRNAME}/../../scripts/pii_mask.sh' <<< 'AKIAIOSFODNN7EXAMPLE alice@example.com' 2>&1 1>/dev/null"
     [[ "$output" == *"masked: 2"* ]]
+}
+
+@test "zero-width custom regex does not hang" {
+    run timeout 3 bash -c "WORKLOG_PII_CUSTOM='x*' '${BATS_TEST_DIRNAME}/../../scripts/pii_mask.sh' <<< 'aaa'"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"aaa"* ]]
+}
+
+@test "anchor-only custom regex does not hang" {
+    run timeout 3 bash -c "WORKLOG_PII_CUSTOM='^' '${BATS_TEST_DIRNAME}/../../scripts/pii_mask.sh' <<< 'word'"
+    [ "$status" -eq 0 ]
 }

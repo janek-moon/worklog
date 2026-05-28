@@ -4,6 +4,12 @@
 # Env:
 #   WORKLOG_PII_ALLOW   comma-separated literal strings to keep verbatim
 #   WORKLOG_PII_CUSTOM  comma-separated additional ERE patterns to mask
+#
+# Reserved characters in WORKLOG_PII_ALLOW:
+#   ','  — token separator (use one variable per allowed value to include commas)
+#   '|'  — internal sentinel (allowlist values containing '|' will be split on it)
+# Standard tokens (emails, AWS keys, gh tokens, KR phone/RRN) never contain these,
+# so this restriction does not affect the documented allowlist use cases.
 
 set -euo pipefail
 
@@ -71,7 +77,13 @@ masked_output=$(
                 while (match(rest, pat)) {
                     before  = substr(rest, 1, RSTART - 1)
                     matched = substr(rest, RSTART, RLENGTH)
-                    rest    = substr(rest, RSTART + RLENGTH)
+                    if (RLENGTH == 0) {
+                        # Zero-width match: consume one char so we make progress.
+                        if (length(rest) < RSTART) break
+                        out = out before substr(rest, RSTART, 1)
+                        rest = substr(rest, RSTART + 1)
+                        continue
+                    }
                     # Allowlist check: exact match enclosed in "|...|" markers.
                     if (allow != "" && index(allow, "|" matched "|") > 0) {
                         out = out before matched
@@ -79,6 +91,7 @@ masked_output=$(
                         out = out before "[REDACTED]"
                         count++
                     }
+                    rest = substr(rest, RSTART + RLENGTH)
                 }
                 line = out rest
             }

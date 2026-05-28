@@ -42,6 +42,10 @@ for repo in "${REPOS[@]}"; do
             echo "Warning: gh pr list failed for $repo (exit $ec)" >&2
             continue
         }
+    pr_count=$(echo "$prs" | jq 'length')
+    if [[ "$pr_count" -eq 200 ]]; then
+        echo "Warning: $repo PR list hit --limit 200 cap; results may be truncated" >&2
+    fi
     echo "$prs" | jq -c --arg repo "$repo" '.[] | {
         type:"pr", number:.number, title:.title, state:(.state | ascii_downcase),
         repo:$repo, url:.url, createdAt:.createdAt, mergedAt:.mergedAt,
@@ -50,9 +54,15 @@ for repo in "${REPOS[@]}"; do
     issues=$(gh issue list --repo "$repo" --state all \
         --search "updated:${SINCE}..${UNTIL}" --limit 200 \
         --json number,title,state,url,createdAt,closedAt,labels 2>/dev/null) || {
-            echo "Warning: gh issue list failed for $repo" >&2
+            ec=$?
+            if [[ $ec -eq 4 ]]; then echo "auth failed for $repo (issues)" >&2; exit 2; fi
+            echo "Warning: gh issue list failed for $repo (exit $ec)" >&2
             continue
         }
+    issue_count=$(echo "$issues" | jq 'length')
+    if [[ "$issue_count" -eq 200 ]]; then
+        echo "Warning: $repo issue list hit --limit 200 cap; results may be truncated" >&2
+    fi
     echo "$issues" | jq -c --arg repo "$repo" '.[] | {
         type:"issue", number:.number, title:.title, state:(.state | ascii_downcase),
         repo:$repo, url:.url, createdAt:.createdAt, closedAt:.closedAt,

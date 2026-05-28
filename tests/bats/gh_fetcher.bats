@@ -39,3 +39,25 @@ teardown() { rm -rf "$MOCK_DIR"; }
         --since 2025-05-27 --until 2025-05-28 --repos o/r
     [ "$status" -eq 1 ]
 }
+
+@test "gh.sh warns on --limit 200 saturation" {
+    MOCK_DIR="${BATS_TMPDIR}/gh-mock-sat-$$"
+    mkdir -p "$MOCK_DIR"
+    # Generate a 200-element JSON array via jq
+    cat > "$MOCK_DIR/gh" <<'MOCK'
+#!/usr/bin/env bash
+if [[ "$1" == "pr" && "$2" == "list" ]]; then
+    jq -n '[range(200)] | map({number:(. + 1),title:"PR \(.)",state:"MERGED",url:"https://github.com/o/r/pull/\(.+1)",createdAt:"2025-05-27T00:00:00Z",mergedAt:"2025-05-27T01:00:00Z",closedAt:null,labels:[]})'
+elif [[ "$1" == "issue" && "$2" == "list" ]]; then
+    echo "[]"
+else
+    exit 1
+fi
+MOCK
+    chmod +x "$MOCK_DIR/gh"
+    PATH="$MOCK_DIR:$PATH" run "${BATS_TEST_DIRNAME}/../../scripts/fetchers/pr/gh.sh" \
+        --since 2025-05-27 --until 2025-05-28 --repos o/r
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"hit --limit 200 cap"* ]]
+    rm -rf "$MOCK_DIR"
+}

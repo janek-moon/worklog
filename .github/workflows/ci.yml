@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bats + shellcheck + jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats shellcheck jq
+
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli@4
+
+      - name: Shellcheck
+        run: find scripts -name "*.sh" -print0 | xargs -0 shellcheck
+
+      - name: Validate config example
+        run: ajv validate --spec=draft7 --allow-union-types -s schemas/config.schema.json -d config.example.json
+
+      - name: Validate sample frontmatter
+        run: ajv validate --spec=draft7 --allow-union-types -s schemas/frontmatter.schema.json -d tests/fixtures/sample_frontmatter.json
+
+      - name: Run bats
+        run: bats tests/bats/

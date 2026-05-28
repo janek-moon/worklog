@@ -26,6 +26,7 @@ li { margin: 0.2em 0; }
                 border: 1px solid var(--border); border-radius: 6px; padding: 0.4em 0.8em;
                 cursor: pointer; font-size: 0.9em; }
 .theme-toggle:hover { background: var(--code-bg); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 blockquote { border-left: 4px solid var(--border); padding-left: 1em; color: var(--muted); margin: 1em 0; }
 table { border-collapse: collapse; margin: 1em 0; }
@@ -40,17 +41,21 @@ th { background: var(--code-bg); }
 (function() {
   var root = document.documentElement;
   var btn = document.getElementById('themeToggle');
-  var saved = localStorage.getItem('worklog-theme');
+  function getTheme() { try { return localStorage.getItem('worklog-theme'); } catch (e) { return null; } }
+  function setTheme(v) { try { localStorage.setItem('worklog-theme', v); } catch (e) {} }
+  var saved = getTheme();
   if (saved === 'dark') root.setAttribute('data-theme', 'dark');
-  function update() { btn.textContent = root.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'; }
+  function update() {
+    btn.textContent = root.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  }
   update();
   btn.addEventListener('click', function() {
     if (root.getAttribute('data-theme') === 'dark') {
       root.removeAttribute('data-theme');
-      localStorage.setItem('worklog-theme', 'light');
+      setTheme('light');
     } else {
       root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('worklog-theme', 'dark');
+      setTheme('dark');
     }
     update();
   });

@@ -58,7 +58,7 @@ Record per-source `status`: `ok` | `disabled` | `skipped` | `failed` | `degraded
 ### Step 4. Synthesize
 
 1. Build chronological merged timeline.
-2. Pipe all text through `scripts/pii_mask.sh` (env: `WORKLOG_PII_ALLOW=<emails>`, `WORKLOG_PII_CUSTOM=<patterns>`).
+2. Pipe all text through `scripts/pii_mask.sh` (env: `WORKLOG_PII_ALLOW=<config.pii.allowedEmails joined by ",">`, `WORKLOG_PII_CUSTOM=<config.pii.customPatterns joined by ",">`).
 3. Determine language (auto cache in `${configDir}/state.json`).
 4. KPT draft (English headings, narrative in resolved language):
    - **Keep**, **Problem**, **Try**.

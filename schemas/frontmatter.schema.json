@@ -1,0 +1,51 @@
+{
+  "title": "worklog output frontmatter",
+  "type": "object",
+  "required": ["period", "type", "generated", "tz", "sources", "framework", "language"],
+  "properties": {
+    "period": { "type": "string" },
+    "type": { "type": "string", "enum": ["daily", "weekly", "monthly", "range"] },
+    "generated": { "type": "string" },
+    "tz": { "type": "string" },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "disabled", "skipped", "failed", "degraded", "none", "corrupted"]
+          },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "framework": { "type": "string", "enum": ["KPT"] },
+    "language": { "type": "string", "enum": ["ko", "en"] },
+    "pii": {
+      "type": "object",
+      "properties": {
+        "maskedCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "learnings": {
+      "type": "object",
+      "properties": {
+        "candidatesCount": { "type": "integer", "minimum": 0 },
+        "applied": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["candidate", "target", "appliedAt"],
+            "properties": {
+              "candidate": { "type": "string" },
+              "target": { "type": "string" },
+              "appliedAt": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

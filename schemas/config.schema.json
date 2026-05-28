@@ -1,0 +1,107 @@
+{
+  "title": "worklog config",
+  "type": "object",
+  "properties": {
+    "output": {
+      "type": "object",
+      "properties": {
+        "dir": { "type": "string" },
+        "htmlMirror": { "type": "boolean", "default": true }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "properties": {
+        "git": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "repos": { "type": "array", "items": { "type": "string" }, "default": [] },
+            "prFetcher": { "type": "string", "default": "gh" }
+          }
+        },
+        "claudeCode": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "depth": { "type": "string", "enum": ["meta", "summary", "full"], "default": "meta" }
+          }
+        },
+        "priorRetros": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true }
+          }
+        },
+        "currentRules": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "extraPaths": { "type": "array", "items": { "type": "string" }, "default": [] }
+          }
+        },
+        "mcp": {
+          "type": "object",
+          "properties": {
+            "atlassian": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean", "default": false },
+                "projectKeys": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "notion": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean", "default": false },
+                "databaseIds": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "learnings": {
+      "type": "object",
+      "properties": {
+        "extraction": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "maxCandidates": { "type": "integer", "minimum": 0, "default": 5 }
+          }
+        },
+        "apply": {
+          "type": "object",
+          "properties": {
+            "targets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["path"],
+                "properties": {
+                  "path": { "type": "string" },
+                  "section": { "type": ["string", "null"], "default": null },
+                  "ifAbsent": { "type": "string", "enum": ["skip", "create", "error"], "default": "skip" }
+                }
+              }
+            },
+            "requireApproval": { "type": "boolean", "default": true },
+            "dryRun": { "type": "boolean", "default": false },
+            "backupSuffix": { "type": "string", "default": ".bak" }
+          }
+        }
+      }
+    },
+    "framework": { "type": "string", "enum": ["KPT"], "default": "KPT" },
+    "language": { "type": "string", "enum": ["auto", "ko", "en"], "default": "auto" },
+    "tz": { "type": ["string", "null"], "default": null },
+    "pii": {
+      "type": "object",
+      "properties": {
+        "allowedEmails": { "type": "array", "items": { "type": "string" } },
+        "customPatterns": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

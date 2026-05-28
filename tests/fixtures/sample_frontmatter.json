@@ -1,0 +1,19 @@
+{
+  "period": "2025-05-27",
+  "type": "daily",
+  "generated": "2025-05-28T10:30:00+09:00",
+  "tz": "Asia/Seoul",
+  "sources": {
+    "git": { "status": "ok" },
+    "claudeCode": { "status": "ok" },
+    "priorRetros": { "status": "none" },
+    "currentRules": { "status": "ok" }
+  },
+  "framework": "KPT",
+  "language": "ko",
+  "pii": { "maskedCount": 0 },
+  "learnings": {
+    "candidatesCount": 2,
+    "applied": []
+  }
+}

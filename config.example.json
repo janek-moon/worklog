@@ -1,0 +1,32 @@
+{
+  "output": {
+    "dir": "~/.local/share/worklog",
+    "htmlMirror": true
+  },
+  "sources": {
+    "git": { "enabled": true, "repos": [], "prFetcher": "gh" },
+    "claudeCode": { "enabled": true, "depth": "meta" },
+    "priorRetros": { "enabled": true },
+    "currentRules": { "enabled": true, "extraPaths": [] },
+    "mcp": {
+      "atlassian": { "enabled": false, "projectKeys": [] },
+      "notion": { "enabled": false, "databaseIds": [] }
+    }
+  },
+  "learnings": {
+    "extraction": { "enabled": true, "maxCandidates": 5 },
+    "apply": {
+      "targets": [
+        { "path": "./CLAUDE.md", "section": "## Auto-curated Learnings", "ifAbsent": "skip" },
+        { "path": "~/.local/share/worklog/learnings.md", "section": null, "ifAbsent": "create" }
+      ],
+      "requireApproval": true,
+      "dryRun": false,
+      "backupSuffix": ".bak"
+    }
+  },
+  "framework": "KPT",
+  "language": "auto",
+  "tz": null,
+  "pii": { "allowedEmails": [], "customPatterns": [] }
+}

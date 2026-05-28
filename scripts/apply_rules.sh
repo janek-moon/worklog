@@ -54,6 +54,7 @@ done
 parse_candidates() {
     awk '
         BEGIN { in_section=0; in_cand=0; idx=0; print "[" }
+        { sub(/\r$/, "") }
         /^## Rule Candidates[[:space:]]*$/ { in_section=1; next }
         in_section && /^## / && !/^## Rule Candidates/ { in_section=0 }
         in_section && /^### Candidate / {
@@ -141,6 +142,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
     if [[ -n "$SECTION" ]] && grep -qxF "$SECTION" "$tmp"; then
         WORKLOG_APPEND="$appended" awk -v sec="$SECTION" '
             BEGIN { in_sec=0; added=0; add=ENVIRON["WORKLOG_APPEND"] }
+            { sub(/\r$/, "") }
             in_sec && !added && /^## / && $0 != sec {
                 printf("%s", add); added=1; in_sec=0
             }
@@ -162,13 +164,14 @@ if [[ $AUTO_ACCEPT -ne 1 ]]; then
     exit 3
 fi
 
-# Backup once
-[[ -f "$TARGET" ]] && cp "$TARGET" "${TARGET}${BACKUP_SUFFIX}"
+# Backup once — preserve the pre-first-apply state
+[[ -f "$TARGET" && ! -f "${TARGET}${BACKUP_SUFFIX}" ]] && cp "$TARGET" "${TARGET}${BACKUP_SUFFIX}"
 
 if [[ -n "$SECTION" ]] && grep -qxF "$SECTION" "$TARGET"; then
     tmp="$(mktemp)"
     WORKLOG_APPEND="$appended" awk -v sec="$SECTION" '
         BEGIN { in_sec=0; added=0; add=ENVIRON["WORKLOG_APPEND"] }
+        { sub(/\r$/, "") }
         in_sec && !added && /^## / && $0 != sec {
             printf("%s", add); added=1; in_sec=0
         }

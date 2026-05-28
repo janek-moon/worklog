@@ -66,3 +66,35 @@ teardown() { rm -rf "$WORK"; }
         "$WORK/retro.md"
     [ "$status" -eq 1 ]
 }
+
+@test "apply --parse-only handles CRLF retro file without breaking jq" {
+    crlf_retro="${BATS_TMPDIR}/crlf-retro-$$.md"
+    sed 's/$/\r/' "${BATS_TEST_DIRNAME}/../fixtures/sample_retro_with_candidates.md" > "$crlf_retro"
+    run "${BATS_TEST_DIRNAME}/../../scripts/apply_rules.sh" --parse-only "$crlf_retro"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e 'length == 2' >/dev/null
+    echo "$output" | jq -e '.[0].rule | startswith("Always run")' >/dev/null
+    rm -f "$crlf_retro"
+}
+
+@test "apply twice preserves original-state backup (backup-once)" {
+    # First apply
+    run "${BATS_TEST_DIRNAME}/../../scripts/apply_rules.sh" \
+        --auto-accept --target "$WORK/CLAUDE.md" \
+        --section "## Auto-curated Learnings" --if-absent skip \
+        "$WORK/retro.md"
+    [ "$status" -eq 0 ]
+    first_bak_hash=$(shasum "$WORK/CLAUDE.md.bak" | cut -d' ' -f1)
+
+    # Second apply on the same target
+    run "${BATS_TEST_DIRNAME}/../../scripts/apply_rules.sh" \
+        --auto-accept --target "$WORK/CLAUDE.md" \
+        --section "## Auto-curated Learnings" --if-absent skip \
+        "$WORK/retro.md"
+    [ "$status" -eq 0 ]
+    second_bak_hash=$(shasum "$WORK/CLAUDE.md.bak" | cut -d' ' -f1)
+
+    # Backup must still hash to the original pristine file
+    [ "$first_bak_hash" = "$second_bak_hash" ]
+    diff "$WORK/CLAUDE.md.bak" "${BATS_TEST_DIRNAME}/../fixtures/sample_claude_md.md"
+}

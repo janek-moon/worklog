@@ -35,7 +35,11 @@ for repo in "${REPOS[@]}"; do
         continue
     fi
     repo_name=$(basename "$(git -C "$repo" rev-parse --show-toplevel)")
-    git -C "$repo" log --since="$SINCE" --until="$UNTIL" --no-merges \
+    # Pin to day boundaries (T00:00:00) so the window is independent of the
+    # current time-of-day. git approxidate appends the current wall-clock time
+    # to a bare YYYY-MM-DD, which would silently drop commits depending on when
+    # the script runs. Dates resolve in the ambient TZ (the user's TZ).
+    git -C "$repo" log --since="${SINCE}T00:00:00" --until="${UNTIL}T00:00:00" --no-merges \
         --pretty='%H%x1F%aI%x1F%s%x1F%ae' \
     | while IFS=$'\x1F' read -r sha date subject author; do
         files_json=$(

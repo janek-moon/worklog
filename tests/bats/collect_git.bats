@@ -58,10 +58,11 @@ teardown() { rm -rf "$REPO"; }
     run "${BATS_TEST_DIRNAME}/../../scripts/collect_git.sh" \
         --since 2025-05-27 --until 2025-05-28 --repos "$REPO"
     [ "$status" -eq 0 ]
-    # emits 2 commits in window (boundary commit at 00:00 UTC excluded by --since);
+    # all 3 commits fall on 2025-05-27 in the window TZ (Asia/Seoul), so all are
+    # included regardless of the time of day the test runs;
     # newest (the empty bump) must have files: []
     n=$(echo "$output" | wc -l | tr -d ' ')
-    [ "$n" -eq 2 ]
+    [ "$n" -eq 3 ]
     echo "$output" | head -1 | jq -e '.files == []'
 }
 

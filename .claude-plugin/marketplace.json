@@ -5,7 +5,7 @@
   "plugins": [
     {
       "name": "worklog",
-      "source": "./",
+      "source": { "source": "github", "repo": "janek-moon/worklog" },
       "description": "Generate work retrospectives and learn agent rules from your activity"
     }
   ]

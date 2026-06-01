@@ -137,8 +137,6 @@ shellcheck scripts/**/*.sh
 npx ajv-cli validate -s schemas/config.schema.json -d config.example.json
 ```
 
-[SPEC.md](./SPEC.md) explains design rationale. [PLAN.md](./PLAN.md) is the build plan.
-
 ## License
 
 MIT — see [LICENSE](./LICENSE). © 2025 worklog contributors.

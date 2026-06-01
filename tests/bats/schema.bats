@@ -58,11 +58,11 @@ JSON
     [ "$status" -eq 0 ]
 }
 
-@test "config with invalid claudeCode.depth fails" {
-    cat > "${BATS_TMPDIR}/bad_depth.json" <<'JSON'
-{ "sources": { "claudeCode": { "depth": "bogus" } } }
+@test "config with invalid git.enabled type fails" {
+    cat > "${BATS_TMPDIR}/bad_git.json" <<'JSON'
+{ "sources": { "git": { "enabled": "yes" } } }
 JSON
-    run npx --yes ajv-cli validate --spec=draft7 --allow-union-types -s schemas/config.schema.json -d "${BATS_TMPDIR}/bad_depth.json"
+    run npx --yes ajv-cli validate --spec=draft7 --allow-union-types -s schemas/config.schema.json -d "${BATS_TMPDIR}/bad_git.json"
     [ "$status" -ne 0 ]
 }
 

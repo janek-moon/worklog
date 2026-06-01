@@ -2,7 +2,7 @@
 
 Run before release / merge of significant changes. CI does not cover Claude-driven synthesis or interactive apply.
 
-Setup: have a local git repo with recent commits, `gh auth status` showing logged in.
+Setup: have a local git repo with recent commits. Optionally add a `PLAN.md` / `SPEC.md` to exercise the plan source.
 
 ## Generate flow
 
@@ -33,47 +33,33 @@ Expect: frontmatter `period: 2025-05-27`, `type: daily`.
 
 Expect: normalizes to `2025-05`, type `monthly`. If ambiguous, asks once.
 
-### Smoke 4: MCP disabled
+### Smoke 4: Plan doc contrast
 
-Fresh shell, no config.json:
-
-```
-/worklog 2025-05-27
-```
-
-Expect: frontmatter `atlassian: {status: disabled}`, `notion: {status: disabled}`. No errors.
-
-### Smoke 5: MCP enabled
-
-Configure `atlassian.enabled = true` with real `projectKeys`:
+Add a `PLAN.md` with a planned item, commit some work toward it, then:
 
 ```
 /worklog 2025-05-27
 ```
 
-Expect: frontmatter `atlassian: {status: ok}`, body has `### Jira` subsection.
+Expect: frontmatter `plan: {status: ok}`; KPT narrative contrasts the plan against the delivered git diff. With no plan doc present, expect `plan: {status: none}` and no errors.
 
-### Smoke 6: Re-run same period
+### Smoke 5: Re-run same period
 
 Run Smoke 2 twice. Expect `.md.bak` appears.
 
-### Smoke 7: PII masking
+### Smoke 6: PII masking
 
 Add a commit with fake AWS key `AKIAIOSFODNN7TESTING` in the message. Run worklog covering that day. Expect commit subject shows `[REDACTED]`; frontmatter `pii.maskedCount` ≥ 1.
 
-### Smoke 8: Prior Try carry-over
-
-Edit yesterday's worklog file to add an unchecked Try item. Run today's worklog. Expect today's report includes `## Prior Try` with that item as `- [ ]`.
-
-### Smoke 9: Rule Candidates appear
+### Smoke 7: Rule Candidates appear
 
 Run any generate flow. Expect `## Rule Candidates` section with at least one `### Candidate N:` entry (if extraction enabled and activity exists). Frontmatter `learnings.candidatesCount > 0`.
 
 ## Apply flow
 
-### Smoke 10: Apply with interactive approval
+### Smoke 8: Apply with interactive approval
 
-After Smoke 9:
+After Smoke 7:
 
 ```
 /worklog apply ~/.local/share/worklog/worklog-YYYY-MM-DD.md
@@ -85,7 +71,7 @@ Expect: prompts per candidate. Choose `a` for candidate 1, `s` for candidate 2.
 - `.bak` files appear next to modified targets.
 - Retro frontmatter `learnings.applied[]` has 2 entries (one per target).
 
-### Smoke 11: Apply --dry-run
+### Smoke 9: Apply --dry-run
 
 ```
 /worklog apply <retro> --dry-run
@@ -93,7 +79,7 @@ Expect: prompts per candidate. Choose `a` for candidate 1, `s` for candidate 2.
 
 Expect: unified diff output, no file changes, no `.bak` created, frontmatter unchanged.
 
-### Smoke 12: Apply --target
+### Smoke 10: Apply --target
 
 ```
 /worklog apply <retro> --target ./CLAUDE.md
@@ -101,13 +87,9 @@ Expect: unified diff output, no file changes, no `.bak` created, frontmatter unc
 
 Expect: only `./CLAUDE.md` touched. `learnings.md` unchanged.
 
-### Smoke 13: Apply with ifAbsent: create
+### Smoke 11: Apply with ifAbsent: create
 
 Remove `learnings.md`, configure target with `"ifAbsent": "create"`, run apply with that target. Expect file created.
-
-### Smoke 14: Apply skips duplicate next time
-
-After Smoke 10, run a new `/worklog` for an overlapping period. Expect: in the new report, the previously applied rule does NOT reappear in `## Rule Candidates`.
 
 ---
 

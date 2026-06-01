@@ -5,9 +5,7 @@
   "tz": "Asia/Seoul",
   "sources": {
     "git": { "status": "ok" },
-    "claudeCode": { "status": "ok" },
-    "priorRetros": { "status": "none" },
-    "currentRules": { "status": "ok" }
+    "plan": { "status": "ok" }
   },
   "framework": "KPT",
   "language": "ko",

@@ -4,14 +4,8 @@
     "htmlMirror": true
   },
   "sources": {
-    "git": { "enabled": true, "repos": [], "prFetcher": "gh" },
-    "claudeCode": { "enabled": true, "depth": "meta" },
-    "priorRetros": { "enabled": true },
-    "currentRules": { "enabled": true, "extraPaths": [] },
-    "mcp": {
-      "atlassian": { "enabled": false, "projectKeys": [] },
-      "notion": { "enabled": false, "databaseIds": [] }
-    }
+    "git": { "enabled": true, "repos": [] },
+    "plan": { "enabled": true, "paths": ["PLAN.md", "SPEC.md"] }
   },
   "learnings": {
     "extraction": { "enabled": true, "maxCandidates": 5 },

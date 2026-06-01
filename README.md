@@ -1,6 +1,5 @@
 # worklog
 
-[![CI](https://github.com/YOUR_ORG/worklog/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_ORG/worklog/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A Claude Code plugin for **personal work retrospectives + agent rule learning**. Generate a daily / weekly / monthly retrospective from your activity, then turn the patterns into rules your agent actually follows.
@@ -13,9 +12,9 @@ A Claude Code plugin for **personal work retrospectives + agent rule learning**.
 
 ## Two commands, one feedback loop
 
-1. `/worklog [period]` collects facts from git, GitHub PRs, Claude Code sessions, optional Atlassian and Notion, and your previous retros — then writes a markdown + HTML retrospective with **Activities**, **Prior Try**, **KPT**, and **Rule Candidates**.
+1. `/worklog [period]` collects facts from git and your local planning docs (`PLAN.md` / `SPEC.md`), contrasts planned intent against the delivered git diff, then writes a markdown + HTML retrospective with **Activities**, **KPT**, and **Rule Candidates**.
 
-2. `/worklog apply <retro-file>` walks you through each Rule Candidate (accept / edit / skip), backs up your target rule files (`./CLAUDE.md`, `./AGENTS.md`, `learnings.md`), and appends the approved rules. Your next retro reads the current rules and won't propose duplicates.
+2. `/worklog apply <retro-file>` walks you through each Rule Candidate (accept / edit / skip), backs up your target rule files (`./CLAUDE.md`, `./AGENTS.md`, `learnings.md`), and appends the approved rules. Per-candidate approval gates every write.
 
 ## Install
 
@@ -28,34 +27,25 @@ This is a Claude Code plugin. Installation flow varies by host — see Claude Co
 | `git` | ✅ | Commit collection |
 | `jq` | ✅ | JSON processing |
 | `bash` ≥ 4.4 | ✅ | Scripts |
-| `gh` CLI | recommended | PR/Issue collection |
 | `node` + `ajv-cli` | dev only | Schema validation |
 | `bats-core`, `shellcheck` | dev only | Tests + lint |
 
 ```bash
 # macOS
-brew install bash jq gh bats-core shellcheck
+brew install bash jq bats-core shellcheck
 ```
 
 ## Configure
 
-Copy `config.example.json` to `~/.config/worklog/config.json` and edit. Defaults if no file: git + Claude Code sources enabled, MCP off, learnings extracted but no auto-apply targets.
+Copy `config.example.json` to `~/.config/worklog/config.json` and edit. Defaults if no file: git + plan sources enabled, learnings extracted but no auto-apply targets.
 
-### Enable Atlassian (Jira)
-
-```json
-"atlassian": { "enabled": true, "projectKeys": ["MYPROJ"] }
-```
-
-Requires the Atlassian MCP. worklog auto-detects your Jira accountId via `atlassianUserInfo`.
-
-### Enable Notion
+### Plan docs
 
 ```json
-"notion": { "enabled": true, "databaseIds": ["abc123...", "def456..."] }
+"plan": { "enabled": true, "paths": ["PLAN.md", "SPEC.md"] }
 ```
 
-Requires the Notion MCP. List the databases to scan for recent edits.
+Paths resolve relative to each git repo (or cwd). worklog reads these planning docs as "planned intent" and contrasts them against the delivered git diff. Missing paths are skipped quietly — handy when the docs are kept local (gitignored).
 
 ### Learnings (rule auto-curation)
 
@@ -121,13 +111,9 @@ Re-running on the same period rotates the old file to `*.md.bak` once before ove
 
 ## Extending
 
-### Add a PR fetcher (e.g., GitLab MCP)
+### Add a source
 
-Match the [PullRequestFetcher contract](./scripts/fetchers/pr/README.md), drop into `scripts/fetchers/pr/`, set `sources.git.prFetcher`.
-
-### Add an MCP source
-
-Add `skills/worklog-generator/sources/<name>.md`, extend `schemas/config.schema.json` and `SKILL.md`.
+Add `skills/worklog-generator/sources/<name>.md` (procedure + status mapping, mirroring `git.md` / `plan.md`), then extend `schemas/config.schema.json` and the collect step in `SKILL.md`.
 
 ## Develop
 

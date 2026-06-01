@@ -16,47 +16,14 @@
           "type": "object",
           "properties": {
             "enabled": { "type": "boolean", "default": true },
-            "repos": { "type": "array", "items": { "type": "string" }, "default": [] },
-            "prFetcher": { "type": "string", "default": "gh" }
+            "repos": { "type": "array", "items": { "type": "string" }, "default": [] }
           }
         },
-        "claudeCode": {
+        "plan": {
           "type": "object",
           "properties": {
             "enabled": { "type": "boolean", "default": true },
-            "depth": { "type": "string", "enum": ["meta", "summary", "full"], "default": "meta" }
-          }
-        },
-        "priorRetros": {
-          "type": "object",
-          "properties": {
-            "enabled": { "type": "boolean", "default": true }
-          }
-        },
-        "currentRules": {
-          "type": "object",
-          "properties": {
-            "enabled": { "type": "boolean", "default": true },
-            "extraPaths": { "type": "array", "items": { "type": "string" }, "default": [] }
-          }
-        },
-        "mcp": {
-          "type": "object",
-          "properties": {
-            "atlassian": {
-              "type": "object",
-              "properties": {
-                "enabled": { "type": "boolean", "default": false },
-                "projectKeys": { "type": "array", "items": { "type": "string" } }
-              }
-            },
-            "notion": {
-              "type": "object",
-              "properties": {
-                "enabled": { "type": "boolean", "default": false },
-                "databaseIds": { "type": "array", "items": { "type": "string" } }
-              }
-            }
+            "paths": { "type": "array", "items": { "type": "string" }, "default": ["PLAN.md", "SPEC.md"] }
           }
         }
       }

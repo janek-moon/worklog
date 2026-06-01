@@ -1,6 +1,6 @@
 ---
 name: worklog-generator
-description: Generates a daily/weekly/monthly/range work retrospective by collecting activity from git, GitHub PRs, Claude Code sessions, optional MCP sources (Atlassian, Notion), the prior retro, and currently active rule files. Synthesizes a KPT-formatted markdown report with HTML mirror, and extracts a Rule Candidates section for later application via /worklog apply.
+description: Generates a daily/weekly/monthly/range work retrospective by collecting activity from git and local planning docs (PLAN.md/SPEC.md), contrasting planned intent against delivered git diff. Synthesizes a KPT-formatted markdown report with HTML mirror, and extracts a Rule Candidates section for later application via /worklog apply.
 ---
 
 # worklog Generator
@@ -41,17 +41,9 @@ Issue these in one batch:
 
 - `scripts/collect_git.sh --since SINCE --until UNTIL --repos REPOS`
   - `REPOS` from `config.sources.git.repos` if non-empty; else cwd if a git repo; else skip.
-- `scripts/fetchers/pr/<prFetcher>.sh --since SINCE --until UNTIL --repos OWNER_NAMES`
-  - `OWNER_NAMES` derived from `git remote get-url origin` of each repo (parse `owner/name`).
-  - Skip if no remote URLs.
-- Read `~/.claude/projects/`: metadata per session in window (depth per `sources.claudeCode.depth`).
-- Prior retro: list `$output.dir/worklog-*.md` of same `type`, pick most recent before SINCE. Extract `### Try` items. Compute `gapDays`.
-- Current rule files (`sources.currentRules.enabled`):
-  - Read `./CLAUDE.md`, `./AGENTS.md`, `~/.claude/CLAUDE.md`, accumulated `learnings.md` (from output.dir), and `extraPaths[]`.
-  - Concatenate. Skip nonexistent files quietly.
-- MCP (only enabled):
-  - Atlassian: `atlassianUserInfo` → JQL `assignee = currentUser() AND project = <KEY> AND updated >= SINCE AND updated < UNTIL`.
-  - Notion: `notion-fetch` for each `databaseIds[]` with `last_edited_time >= SINCE`, client-side filter `< UNTIL`.
+- Plan docs (`sources.plan.enabled`):
+  - Resolve `sources.plan.paths[]` (default `["PLAN.md", "SPEC.md"]`) relative to each repo (or cwd). Expand `~`.
+  - Read each existing, readable doc; skip missing quietly. Flag docs touched in the window via `git log --since SINCE --until UNTIL -- <path>`.
 
 Record per-source `status`: `ok` | `disabled` | `skipped` | `failed` | `degraded` | `none` | `corrupted`.
 
@@ -62,17 +54,17 @@ Record per-source `status`: `ok` | `disabled` | `skipped` | `failed` | `degraded
 3. Determine language (auto cache in `${configDir}/state.json`).
 4. KPT draft (English headings, narrative in resolved language):
    - **Keep**, **Problem**, **Try**.
+   - Contrast plan docs (planned intent) against the git timeline (delivered): note where work matched, drifted from, or exceeded the plan.
 5. Rule Candidates extraction (only if `learnings.extraction.enabled`):
    - Inspect the activity timeline + KPT.Problem patterns.
    - Generalize patterns that recur or have clear cause-effect into rule candidates.
-   - Drop any candidate that overlaps with an existing rule in the currentRules concatenation (lexical similarity > 70% or same imperative core verb on same noun phrase).
    - Cap at `learnings.extraction.maxCandidates`.
    - For each candidate: `{ rule, rationale, evidence: [activity refs], suggestedTargets }` per SPEC § Appendix E.
 
 ### Step 5. Write outputs
 
 1. Build frontmatter per `schemas/frontmatter.schema.json`. Include `learnings.candidatesCount` and `learnings.applied: []`.
-2. Build markdown body per SPEC § 4.4 (Activities / Prior Try / KPT / Rule Candidates).
+2. Build markdown body per SPEC § 4.4 (Activities / KPT / Rule Candidates).
 3. Filename: `worklog-{period}.md` (rules per SPEC § 4.1).
 4. If destination exists: rotate to `.md.bak` once, then overwrite.
 5. Write markdown (0644).
@@ -85,23 +77,17 @@ worklog: PERIOD (TYPE)
   → DIR/worklog-PERIOD.md
   → DIR/html/worklog-PERIOD.html
   PII masked: N
-  Sources: git=ok, claudeCode=ok, ...
+  Sources: git=ok, plan=ok
   Rule Candidates: M (apply with: /worklog apply worklog-PERIOD.md)
 ```
 
 ## Error Handling (SPEC § 5.1.1)
 
 - `git` absent → abort exit 1.
-- `gh` absent → mark `git.status: degraded`, continue.
-- MCP failure → source `failed`, record reason, continue.
 - 0 activity (user-specified window) → suggest closest active day; abort if declined.
-- currentRules all missing → `currentRules.status: skipped`, continue.
+- No plan doc found at any resolved path → `plan.status: none`, continue.
 
 ## Source Procedure References
 
 - [git](./sources/git.md)
-- [claude-code](./sources/claude-code.md)
-- [atlassian](./sources/atlassian.md)
-- [notion](./sources/notion.md)
-- [prior-retros](./sources/prior-retros.md)
-- [current-rules](./sources/current-rules.md)
+- [plan](./sources/plan.md)

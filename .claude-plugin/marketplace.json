@@ -1,0 +1,11 @@
+{
+  "name": "worklog",
+  "owner": { "name": "janek-moon" },
+  "plugins": [
+    {
+      "name": "worklog",
+      "source": ".",
+      "description": "Generate work retrospectives and learn agent rules from your activity"
+    }
+  ]
+}

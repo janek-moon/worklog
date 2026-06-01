@@ -18,7 +18,14 @@ A Claude Code plugin for **personal work retrospectives + agent rule learning**.
 
 ## Install
 
-This is a Claude Code plugin. Installation flow varies by host — see Claude Code docs for adding a plugin from a local directory. Once linked, the `/worklog` command and both skills are available.
+This repo is a Claude Code plugin marketplace. Add it, then install (requires Claude Code v2.1.140+):
+
+```
+/plugin marketplace add janek-moon/worklog
+/plugin install worklog@worklog
+```
+
+Once installed, the `/worklog` command and both skills (`worklog-generator`, `worklog-applier`) are available. For development, point the marketplace at a local clone instead: `/plugin marketplace add ./worklog`.
 
 ### Dependencies
 

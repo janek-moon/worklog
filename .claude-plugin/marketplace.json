@@ -1,10 +1,11 @@
 {
   "name": "worklog",
   "owner": { "name": "janek-moon" },
+  "description": "worklog plugin marketplace — work retrospectives + agent rule learning",
   "plugins": [
     {
       "name": "worklog",
-      "source": ".",
+      "source": "./",
       "description": "Generate work retrospectives and learn agent rules from your activity"
     }
   ]
